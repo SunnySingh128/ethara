@@ -10,6 +10,8 @@ const Projects = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newName, setNewName] = useState('');
   const [newDesc, setNewDesc] = useState('');
+  const [allUsers, setAllUsers] = useState([]);
+  const [selectedMembers, setSelectedMembers] = useState([]);
   const { user } = useContext(AuthContext);
 
   const fetchProjects = async () => {
@@ -23,19 +25,40 @@ const Projects = () => {
     }
   };
 
+  const fetchUsers = async () => {
+    try {
+      const { data } = await axios.get('http://localhost:5000/api/auth/users');
+      setAllUsers(data.filter(u => u._id !== user._id));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
-    if (user) fetchProjects();
+    if (user) {
+      fetchProjects();
+      fetchUsers();
+    }
   }, [user]);
+
+  const toggleMember = (id) => {
+    if (selectedMembers.includes(id)) {
+      setSelectedMembers(selectedMembers.filter(m => m !== id));
+    } else {
+      setSelectedMembers([...selectedMembers, id]);
+    }
+  };
 
   const handleCreate = async (e) => {
     e.preventDefault();
     try {
       await axios.post('http://localhost:5000/api/projects', 
-        { name: newName, description: newDesc },
+        { name: newName, description: newDesc, members: selectedMembers },
         { headers: { Authorization: `Bearer ${user.token}` } }
       );
       setNewName('');
       setNewDesc('');
+      setSelectedMembers([]);
       setIsModalOpen(false);
       fetchProjects();
     } catch (err) {
@@ -91,6 +114,30 @@ const Projects = () => {
                   required
                   style={{ width: '100%', height: '100px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', borderRadius: '8px', color: 'white', padding: '12px', outline: 'none' }}
                 />
+              </div>
+              <div style={{ marginBottom: '25px' }}>
+                <label style={{ display: 'block', marginBottom: '8px' }}>Assign Members</label>
+                <div style={{ maxHeight: '120px', overflowY: 'auto', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', padding: '10px', border: '1px solid var(--border)' }}>
+                  {allUsers.map(u => (
+                    <div 
+                      key={u._id} 
+                      onClick={() => toggleMember(u._id)}
+                      style={{ 
+                        padding: '8px', 
+                        cursor: 'pointer', 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        background: selectedMembers.includes(u._id) ? 'var(--primary)40' : 'transparent',
+                        borderRadius: '4px',
+                        marginBottom: '4px'
+                      }}
+                    >
+                      <span>{u.name}</span>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{u.role}</span>
+                    </div>
+                  ))}
+                  {allUsers.length === 0 && <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>No other users found</p>}
+                </div>
               </div>
               <div style={{ display: 'flex', gap: '15px' }}>
                 <button type="submit" className="btn-primary" style={{ flex: 1 }}>Create</button>

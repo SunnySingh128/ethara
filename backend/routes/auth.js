@@ -60,4 +60,11 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// @desc    Get all users
+// @route   GET /api/auth/users
+router.get('/users', async (req, res) => {
+  const users = await User.find({}).select('-password');
+  res.json(users);
+});
+
 module.exports = router;
