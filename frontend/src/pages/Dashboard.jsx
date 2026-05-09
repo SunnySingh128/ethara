@@ -4,6 +4,8 @@ import { AuthContext } from '../context/AuthContext';
 import { motion } from 'framer-motion';
 import { CheckCircle2, Clock, AlertCircle, BarChart3 } from 'lucide-react';
 
+const API = import.meta.env.VITE_API_URL;
+
 const Dashboard = () => {
   const [stats, setStats] = useState(null);
   const { user } = useContext(AuthContext);
@@ -11,7 +13,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const { data } = await axios.get('http://localhost:5000/api/tasks/stats', {
+        const { data } = await axios.get(`${API}/api/tasks/stats`, {
           headers: { Authorization: `Bearer ${user.token}` }
         });
         setStats(data);

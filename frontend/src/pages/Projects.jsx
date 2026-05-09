@@ -5,6 +5,8 @@ import { AuthContext } from '../context/AuthContext';
 import { motion } from 'framer-motion';
 import { Plus, Folder, Users, ChevronRight } from 'lucide-react';
 
+const API = import.meta.env.VITE_API_URL;
+
 const Projects = () => {
   const [projects, setProjects] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -16,7 +18,7 @@ const Projects = () => {
 
   const fetchProjects = async () => {
     try {
-      const { data } = await axios.get('http://localhost:5000/api/projects', {
+      const { data } = await axios.get(`${API}/api/projects`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setProjects(data);
@@ -27,7 +29,7 @@ const Projects = () => {
 
   const fetchUsers = async () => {
     try {
-      const { data } = await axios.get('http://localhost:5000/api/auth/users');
+      const { data } = await axios.get(`${API}/api/auth/users`);
       setAllUsers(data.filter(u => u._id !== user._id));
     } catch (err) {
       console.error(err);
@@ -52,7 +54,7 @@ const Projects = () => {
   const handleCreate = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/api/projects', 
+      await axios.post(`${API}/api/projects`, 
         { name: newName, description: newDesc, members: selectedMembers },
         { headers: { Authorization: `Bearer ${user.token}` } }
       );

@@ -5,6 +5,8 @@ import { AuthContext } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, MoreVertical, Calendar, User } from 'lucide-react';
 
+const API = import.meta.env.VITE_API_URL;
+
 const ProjectBoard = () => {
   const { id } = useParams();
   const { user } = useContext(AuthContext);
@@ -25,10 +27,10 @@ const ProjectBoard = () => {
   const fetchData = async () => {
     try {
       const [taskRes, projectRes] = await Promise.all([
-        axios.get(`http://localhost:5000/api/tasks/project/${id}`, {
+        axios.get(`${API}/api/tasks/project/${id}`, {
           headers: { Authorization: `Bearer ${user.token}` }
         }),
-        axios.get(`http://localhost:5000/api/projects/${id}`, {
+        axios.get(`${API}/api/projects/${id}`, {
           headers: { Authorization: `Bearer ${user.token}` }
         })
       ]);
@@ -48,7 +50,7 @@ const ProjectBoard = () => {
   const handleCreateTask = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/api/tasks', {
+      await axios.post(`${API}/api/tasks`, {
         title,
         description,
         priority,
@@ -69,7 +71,7 @@ const ProjectBoard = () => {
 
   const updateTaskStatus = async (taskId, newStatus) => {
     try {
-      await axios.put(`http://localhost:5000/api/tasks/${taskId}`, { status: newStatus }, {
+      await axios.put(`${API}/api/tasks/${taskId}`, { status: newStatus }, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setTasks(tasks.map(t => t._id === taskId ? { ...t, status: newStatus } : t));
