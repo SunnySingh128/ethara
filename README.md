@@ -4,7 +4,7 @@ A premium, high-performance project management application designed for seamless
 
 ## 🌐 Links
 - **GitHub Repository**: [https://github.com/SunnySingh128/ethara.git](https://github.com/SunnySingh128/ethara.git)
-- **Live URL**: *(Insert Railway Deployment URL here)*
+- **Live URL**: *(https://ethara-production-d760.up.railway.app/)*
 
 ---
 
