@@ -37,23 +37,17 @@ router.post('/', protect, async (req, res) => {
 // @route   GET /api/tasks/project/:projectId
 router.get('/project/:projectId', protect, async (req, res) => {
   try {
-    const Project = require('../models/Project');
-    const project = await Project.findById(req.params.projectId);
-    
-    if (!project) {
-      return res.status(404).json({ message: 'Project not found' });
-    }
-
     let query = { project: req.params.projectId };
 
-    // If user is not the admin of this project, they only see tasks assigned to them
-    if (project.admin.toString() !== req.user._id.toString()) {
+    // Members only see tasks assigned to them; Admins see all tasks
+    if (req.user.role !== 'Admin') {
       query.assignedTo = req.user._id;
     }
 
     const tasks = await Task.find(query).populate('assignedTo', 'name email');
     res.json(tasks);
   } catch (error) {
+    console.error('Error fetching tasks:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });

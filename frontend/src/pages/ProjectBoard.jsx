@@ -35,7 +35,9 @@ const ProjectBoard = () => {
         axios.get(`${API}/api/projects/${id}`, {
           headers: { Authorization: `Bearer ${user.token}` }
         }),
-        axios.get(`${API}/api/auth/users`)
+        axios.get(`${API}/api/auth/users`, {
+          headers: { Authorization: `Bearer ${user.token}` }
+        })
       ]);
       setTasks(taskRes.data);
       setProject(projectRes.data);
