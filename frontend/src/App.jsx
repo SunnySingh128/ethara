@@ -14,6 +14,12 @@ const PrivateRoute = ({ children }) => {
   return user ? children : <Navigate to="/login" />;
 };
 
+const IndexRoute = () => {
+  const { user, loading } = useContext(AuthContext);
+  if (loading) return null;
+  return user ? <Navigate to="/dashboard" /> : <Navigate to="/login" />;
+};
+
 function App() {
   return (
     <AuthProvider>
@@ -38,7 +44,7 @@ function App() {
                 <ProjectBoard />
               </PrivateRoute>
             } />
-            <Route path="/" element={<Navigate to="/dashboard" />} />
+            <Route path="/" element={<IndexRoute />} />
           </Routes>
         </div>
       </Router>
