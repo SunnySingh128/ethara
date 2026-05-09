@@ -8,6 +8,17 @@ const { protect } = require('../middleware/auth');
 router.post('/', protect, async (req, res) => {
   const { title, description, status, priority, dueDate, project, assignedTo } = req.body;
 
+  const Project = require('../models/Project');
+  const projectDoc = await Project.findById(project);
+  
+  if (!projectDoc) {
+    return res.status(404).json({ message: 'Project not found' });
+  }
+
+  if (projectDoc.admin.toString() !== req.user._id.toString()) {
+    return res.status(403).json({ message: 'Only project admin can assign tasks' });
+  }
+
   const task = new Task({
     title,
     description,

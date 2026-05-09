@@ -89,13 +89,15 @@ const ProjectBoard = () => {
           <h1 style={{ marginBottom: '5px' }}>Project Board</h1>
           <p style={{ color: 'var(--text-muted)' }}>Manage and track your project tasks</p>
         </div>
-        <button 
-          onClick={() => setIsModalOpen(true)}
-          className="btn-primary" 
-          style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
-        >
-          <Plus size={18} /> New Task
-        </button>
+        {user?._id === project?.admin?._id && (
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="btn-primary" 
+            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+          >
+            <Plus size={18} /> New Task
+          </button>
+        )}
       </div>
 
       {/* New Task Modal */}
