@@ -9,6 +9,7 @@ const ProjectBoard = () => {
   const { id } = useParams();
   const { user } = useContext(AuthContext);
   const [tasks, setTasks] = useState([]);
+  const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   
@@ -17,15 +18,23 @@ const ProjectBoard = () => {
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState('Medium');
   const [dueDate, setDueDate] = useState('');
+  const [assignedTo, setAssignedTo] = useState('');
 
   const statuses = ['Todo', 'In Progress', 'Done'];
 
-  const fetchTasks = async () => {
+  const fetchData = async () => {
     try {
-      const { data } = await axios.get(`http://localhost:5000/api/tasks/project/${id}`, {
-        headers: { Authorization: `Bearer ${user.token}` }
-      });
-      setTasks(data);
+      const [taskRes, projectRes] = await Promise.all([
+        axios.get(`http://localhost:5000/api/tasks/project/${id}`, {
+          headers: { Authorization: `Bearer ${user.token}` }
+        }),
+        axios.get(`http://localhost:5000/api/projects/${id}`, {
+          headers: { Authorization: `Bearer ${user.token}` }
+        })
+      ]);
+      setTasks(taskRes.data);
+      setProject(projectRes.data);
+      setAssignedTo(user._id);
       setLoading(false);
     } catch (err) {
       console.error(err);
@@ -33,7 +42,7 @@ const ProjectBoard = () => {
   };
 
   useEffect(() => {
-    if (user) fetchTasks();
+    if (user) fetchData();
   }, [id, user]);
 
   const handleCreateTask = async (e) => {
@@ -45,14 +54,14 @@ const ProjectBoard = () => {
         priority,
         dueDate,
         project: id,
-        assignedTo: user._id // Self-assignment for demo
+        assignedTo: assignedTo || user._id
       }, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setIsModalOpen(false);
       setTitle('');
       setDescription('');
-      fetchTasks();
+      fetchData();
     } catch (err) {
       alert('Failed to create task: ' + (err.response?.data?.message || err.message));
     }
@@ -139,6 +148,19 @@ const ProjectBoard = () => {
                     onChange={(e) => setDueDate(e.target.value)}
                     required
                   />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: 'block', marginBottom: '8px' }}>Assign To</label>
+                  <select 
+                    value={assignedTo}
+                    onChange={(e) => setAssignedTo(e.target.value)}
+                    style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', borderRadius: '8px', color: 'white', outline: 'none' }}
+                  >
+                    <option value={project?.admin?._id} style={{ color: 'black' }}>{project?.admin?.name} (Admin)</option>
+                    {project?.members?.map(m => (
+                      <option key={m._id} value={m._id} style={{ color: 'black' }}>{m.name}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
               <div style={{ display: 'flex', gap: '15px' }}>
