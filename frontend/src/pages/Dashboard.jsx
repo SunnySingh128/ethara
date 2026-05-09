@@ -32,30 +32,58 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="container" style={{ padding: '40px 0' }}>
+    <div className="container" style={{ padding: '60px 0' }}>
       <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
       >
-        <h1 style={{ marginBottom: '10px' }}>Dashboard</h1>
-        <p style={{ color: 'var(--text-muted)', marginBottom: '40px' }}>Quick overview of your team's progress</p>
+        <header style={{ marginBottom: '60px', textAlign: 'center' }}>
+          <motion.div
+            initial={{ scale: 0.9 }}
+            animate={{ scale: 1 }}
+            className="glass"
+            style={{ display: 'inline-block', padding: '10px 20px', borderRadius: '100px', marginBottom: '20px', fontSize: '0.85rem', color: 'var(--primary)', border: '1px solid var(--primary)30' }}
+          >
+            👋 Welcome back, {user?.name}
+          </motion.div>
+          <h1 style={{ fontSize: '3.5rem', marginBottom: '15px', background: 'linear-gradient(to right, #fff, var(--primary))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+            System Overview
+          </h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', maxWidth: '600px', margin: '0 auto' }}>
+            Track your team's performance and project milestones in one centralized workspace.
+          </p>
+        </header>
         
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '25px' }}>
           {cards.map((card, index) => (
             <motion.div
               key={index}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
+              transition={{ delay: 0.2 + index * 0.1, duration: 0.5 }}
+              whileHover={{ y: -5, transition: { duration: 0.2 } }}
               className="glass"
-              style={{ padding: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+              style={{ padding: '30px', display: 'flex', flexDirection: 'column', gap: '20px', position: 'relative', overflow: 'hidden' }}
             >
-              <div>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '5px' }}>{card.title}</p>
-                <h3 style={{ fontSize: '2rem' }}>{card.value}</h3>
-              </div>
-              <div style={{ background: `${card.color}20`, padding: '15px', borderRadius: '12px' }}>
+              <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '100px', height: '100px', background: `${card.color}10`, borderRadius: '50%', filter: 'blur(40px)' }}></div>
+              
+              <div style={{ background: `${card.color}15`, width: '56px', height: '56px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: card.color }}>
                 {card.icon}
+              </div>
+              
+              <div>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{card.title}</p>
+                <h3 style={{ fontSize: '2.5rem', fontWeight: '800' }}>{card.value}</h3>
+              </div>
+              
+              <div style={{ height: '4px', width: '100%', background: 'rgba(255,255,255,0.05)', borderRadius: '10px' }}>
+                <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: '70%' }}
+                  transition={{ delay: 1, duration: 1 }}
+                  style={{ height: '100%', background: card.color, borderRadius: '10px', boxShadow: `0 0 10px ${card.color}50` }}
+                ></motion.div>
               </div>
             </motion.div>
           ))}

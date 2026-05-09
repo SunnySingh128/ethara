@@ -148,33 +148,72 @@ const Projects = () => {
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '20px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '30px' }}>
         {projects.map((project, index) => (
           <motion.div
             key={project._id}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: index * 0.05 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1 }}
+            whileHover={{ y: -8 }}
             className="glass"
-            style={{ padding: '25px', position: 'relative' }}
+            style={{ padding: '30px', position: 'relative', display: 'flex', flexDirection: 'column', height: '100%' }}
           >
-            <Link to={`/projects/${project._id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-              <div style={{ display: 'flex', gap: '15px', marginBottom: '20px' }}>
-                <div style={{ padding: '12px', background: 'var(--primary)20', borderRadius: '12px', height: 'fit-content' }}>
-                  <Folder color="var(--primary)" size={24} />
+            <Link to={`/projects/${project._id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column', height: '100%' }}>
+              <div style={{ display: 'flex', gap: '20px', marginBottom: '25px' }}>
+                <div style={{ 
+                  width: '64px', 
+                  height: '64px', 
+                  background: 'linear-gradient(135deg, var(--primary)20, var(--primary)40)', 
+                  borderRadius: '20px', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  boxShadow: '0 8px 16px rgba(0,0,0,0.2)'
+                }}>
+                  <Folder color="var(--primary)" size={32} />
                 </div>
-                <div>
-                  <h3 style={{ marginBottom: '5px' }}>{project.name}</h3>
-                  <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>{project.description}</p>
+                <div style={{ flex: 1 }}>
+                  <h3 style={{ fontSize: '1.4rem', fontWeight: '800', marginBottom: '6px' }}>{project.name}</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                    <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--success)' }}></div>
+                    Active Project
+                  </div>
                 </div>
               </div>
               
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px', paddingTop: '20px', borderTop: '1px solid var(--border)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                  <Users size={16} />
-                  <span>{project.members?.length + 1} members</span>
+              <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)', marginBottom: '30px', flex: 1 }}>
+                {project.description}
+              </p>
+              
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '20px', borderTop: '1px solid var(--border)' }}>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  {[...Array(Math.min(3, project.members?.length + 1))].map((_, i) => (
+                    <div key={i} style={{ 
+                      width: '32px', 
+                      height: '32px', 
+                      borderRadius: '50%', 
+                      background: 'var(--primary)', 
+                      border: '2px solid var(--bg-dark)',
+                      marginLeft: i === 0 ? 0 : '-12px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '0.7rem',
+                      fontWeight: '700'
+                    }}>
+                      {i === 0 ? project.admin?.name?.charAt(0) : 'U'}
+                    </div>
+                  ))}
+                  {project.members?.length > 2 && (
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginLeft: '8px' }}>
+                      +{project.members.length - 2}
+                    </span>
+                  )}
                 </div>
-                <ChevronRight size={20} color="var(--text-muted)" />
+                <div style={{ padding: '8px', borderRadius: '10px', background: 'rgba(255,255,255,0.05)' }}>
+                  <ChevronRight size={18} color="var(--primary)" />
+                </div>
               </div>
             </Link>
           </motion.div>
