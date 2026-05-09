@@ -12,6 +12,7 @@ const ProjectBoard = () => {
   const { user } = useContext(AuthContext);
   const [tasks, setTasks] = useState([]);
   const [project, setProject] = useState(null);
+  const [allUsers, setAllUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   
@@ -26,16 +27,18 @@ const ProjectBoard = () => {
 
   const fetchData = async () => {
     try {
-      const [taskRes, projectRes] = await Promise.all([
+      const [taskRes, projectRes, usersRes] = await Promise.all([
         axios.get(`${API}/api/tasks/project/${id}`, {
           headers: { Authorization: `Bearer ${user.token}` }
         }),
         axios.get(`${API}/api/projects/${id}`, {
           headers: { Authorization: `Bearer ${user.token}` }
-        })
+        }),
+        axios.get(`${API}/api/auth/users`)
       ]);
       setTasks(taskRes.data);
       setProject(projectRes.data);
+      setAllUsers(usersRes.data);
       setAssignedTo(projectRes.data.admin._id);
       setLoading(false);
     } catch (err) {
@@ -160,9 +163,10 @@ const ProjectBoard = () => {
                     onChange={(e) => setAssignedTo(e.target.value)}
                     style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', borderRadius: '8px', color: 'white', outline: 'none' }}
                   >
-                    <option value={project?.admin?._id} style={{ color: 'black' }}>{project?.admin?.name} (Admin)</option>
-                    {project?.members?.map(m => (
-                      <option key={m._id} value={m._id} style={{ color: 'black' }}>{m.name}</option>
+                    {allUsers.map(u => (
+                      <option key={u._id} value={u._id} style={{ color: 'black' }}>
+                        {u.name} {u._id === project?.admin?._id ? '(Admin)' : ''}
+                      </option>
                     ))}
                   </select>
                 </div>
