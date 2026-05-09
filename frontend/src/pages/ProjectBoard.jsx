@@ -199,13 +199,8 @@ const ProjectBoard = () => {
                     onChange={(e) => setAssignedTo(e.target.value)}
                     style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', borderRadius: '8px', color: 'white', outline: 'none' }}
                   >
-                    <option value="" style={{ color: 'black' }}>Unassigned</option>
-                    {project?.admin && (
-                      <option value={project.admin._id} style={{ color: 'black' }}>
-                        {project.admin.name} (Admin)
-                      </option>
-                    )}
-                    {project?.members?.map(m => (
+                    <option value="" style={{ color: 'black' }}>-- Select Member --</option>
+                    {allUsers.filter(u => u.role === 'Member').map(m => (
                       <option key={m._id} value={m._id} style={{ color: 'black' }}>
                         {m.name}
                       </option>
