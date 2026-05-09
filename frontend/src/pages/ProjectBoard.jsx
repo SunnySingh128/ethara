@@ -10,23 +10,53 @@ const ProjectBoard = () => {
   const { user } = useContext(AuthContext);
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  // New Task form state
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [priority, setPriority] = useState('Medium');
+  const [dueDate, setDueDate] = useState('');
 
   const statuses = ['Todo', 'In Progress', 'Done'];
 
+  const fetchTasks = async () => {
+    try {
+      const { data } = await axios.get(`http://localhost:5000/api/tasks/project/${id}`, {
+        headers: { Authorization: `Bearer ${user.token}` }
+      });
+      setTasks(data);
+      setLoading(false);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
-    const fetchTasks = async () => {
-      try {
-        const { data } = await axios.get(`http://localhost:5000/api/tasks/project/${id}`, {
-          headers: { Authorization: `Bearer ${user.token}` }
-        });
-        setTasks(data);
-        setLoading(false);
-      } catch (err) {
-        console.error(err);
-      }
-    };
     if (user) fetchTasks();
   }, [id, user]);
+
+  const handleCreateTask = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post('http://localhost:5000/api/tasks', {
+        title,
+        description,
+        priority,
+        dueDate,
+        project: id,
+        assignedTo: user._id // Self-assignment for demo
+      }, {
+        headers: { Authorization: `Bearer ${user.token}` }
+      });
+      setIsModalOpen(false);
+      setTitle('');
+      setDescription('');
+      fetchTasks();
+    } catch (err) {
+      alert('Failed to create task: ' + (err.response?.data?.message || err.message));
+    }
+  };
 
   const updateTaskStatus = async (taskId, newStatus) => {
     try {
@@ -44,11 +74,81 @@ const ProjectBoard = () => {
   return (
     <div className="container" style={{ padding: '40px 0' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
-        <h1>Project Board</h1>
-        <button className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div>
+          <h1 style={{ marginBottom: '5px' }}>Project Board</h1>
+          <p style={{ color: 'var(--text-muted)' }}>Manage and track your project tasks</p>
+        </div>
+        <button 
+          onClick={() => setIsModalOpen(true)}
+          className="btn-primary" 
+          style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+        >
           <Plus size={18} /> New Task
         </button>
       </div>
+
+      {/* New Task Modal */}
+      {isModalOpen && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.8)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="glass"
+            style={{ padding: '40px', width: '100%', maxWidth: '500px' }}
+          >
+            <h2 style={{ marginBottom: '20px' }}>Create New Task</h2>
+            <form onSubmit={handleCreateTask}>
+              <div style={{ marginBottom: '15px' }}>
+                <label style={{ display: 'block', marginBottom: '8px' }}>Title</label>
+                <input 
+                  type="text" 
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Task title"
+                  required
+                />
+              </div>
+              <div style={{ marginBottom: '15px' }}>
+                <label style={{ display: 'block', marginBottom: '8px' }}>Description</label>
+                <textarea 
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Task details..."
+                  required
+                  style={{ width: '100%', height: '80px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', borderRadius: '8px', color: 'white', padding: '12px', outline: 'none' }}
+                />
+              </div>
+              <div style={{ display: 'flex', gap: '15px', marginBottom: '25px' }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: 'block', marginBottom: '8px' }}>Priority</label>
+                  <select 
+                    value={priority}
+                    onChange={(e) => setPriority(e.target.value)}
+                    style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', borderRadius: '8px', color: 'white', outline: 'none' }}
+                  >
+                    <option value="Low" style={{ color: 'black' }}>Low</option>
+                    <option value="Medium" style={{ color: 'black' }}>Medium</option>
+                    <option value="High" style={{ color: 'black' }}>High</option>
+                  </select>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: 'block', marginBottom: '8px' }}>Due Date</label>
+                  <input 
+                    type="date" 
+                    value={dueDate}
+                    onChange={(e) => setDueDate(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '15px' }}>
+                <button type="submit" className="btn-primary" style={{ flex: 1 }}>Create Task</button>
+                <button type="button" onClick={() => setIsModalOpen(false)} style={{ flex: 1, background: 'rgba(255,255,255,0.1)', color: 'white' }}>Cancel</button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '25px', alignItems: 'start' }}>
         {statuses.map((status) => (
@@ -63,7 +163,7 @@ const ProjectBoard = () => {
               </span>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', minHeight: '200px' }}>
               <AnimatePresence>
                 {tasks.filter(t => t.status === status).map((task) => (
                   <motion.div
@@ -80,12 +180,18 @@ const ProjectBoard = () => {
                         fontSize: '0.7rem', 
                         padding: '4px 8px', 
                         borderRadius: '4px', 
-                        background: task.priority === 'High' ? '#f43f5e20' : '#6366f120',
-                        color: task.priority === 'High' ? 'var(--accent)' : 'var(--primary)'
+                        background: task.priority === 'High' ? '#f43f5e20' : task.priority === 'Medium' ? '#f59e0b20' : '#10b98120',
+                        color: task.priority === 'High' ? 'var(--accent)' : task.priority === 'Medium' ? 'var(--warning)' : 'var(--success)'
                       }}>
                         {task.priority}
                       </span>
-                      <MoreVertical size={16} color="var(--text-muted)" />
+                      <select 
+                        value={task.status}
+                        onChange={(e) => updateTaskStatus(task._id, e.target.value)}
+                        style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: '0.75rem', outline: 'none', cursor: 'pointer' }}
+                      >
+                        {statuses.map(s => <option key={s} value={s} style={{ color: 'black' }}>{s}</option>)}
+                      </select>
                     </div>
                     <h4 style={{ marginBottom: '8px' }}>{task.title}</h4>
                     <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '15px' }}>{task.description}</p>
