@@ -1,14 +1,15 @@
 import { useEffect, useState, useContext } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, MoreVertical, Calendar, User } from 'lucide-react';
+import { Plus, MoreVertical, Calendar, User, Trash2 } from 'lucide-react';
 
 const API = import.meta.env.VITE_API_URL?.replace(/\/$/, '') || 'http://localhost:5000';
 
 const ProjectBoard = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { user } = useContext(AuthContext);
   const [tasks, setTasks] = useState([]);
   const [project, setProject] = useState(null);
@@ -39,7 +40,7 @@ const ProjectBoard = () => {
       setTasks(taskRes.data);
       setProject(projectRes.data);
       setAllUsers(usersRes.data);
-      setAssignedTo(projectRes.data.admin._id);
+      setAssignedTo('');
       setLoading(false);
     } catch (err) {
       console.error(err);
@@ -59,7 +60,7 @@ const ProjectBoard = () => {
         priority,
         dueDate,
         project: id,
-        assignedTo: assignedTo || project?.admin?._id
+        assignedTo: assignedTo === '' ? null : assignedTo
       }, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
@@ -83,6 +84,32 @@ const ProjectBoard = () => {
     }
   };
 
+  const handleDeleteTask = async (taskId) => {
+    if (window.confirm('Are you sure you want to delete this task?')) {
+      try {
+        await axios.delete(`${API}/api/tasks/${taskId}`, {
+          headers: { Authorization: `Bearer ${user.token}` }
+        });
+        setTasks(tasks.filter(t => t._id !== taskId));
+      } catch (err) {
+        alert('Failed to delete task: ' + (err.response?.data?.message || err.message));
+      }
+    }
+  };
+
+  const handleDeleteProject = async () => {
+    if (window.confirm('Are you sure you want to delete this project? All associated tasks will also be deleted. This action cannot be undone.')) {
+      try {
+        await axios.delete(`${API}/api/projects/${id}`, {
+          headers: { Authorization: `Bearer ${user.token}` }
+        });
+        navigate('/'); // Navigate to Dashboard/Home
+      } catch (err) {
+        alert('Failed to delete project: ' + (err.response?.data?.message || err.message));
+      }
+    }
+  };
+
   if (loading) return <div className="container" style={{ padding: '40px' }}>Loading tasks...</div>;
 
   return (
@@ -93,13 +120,22 @@ const ProjectBoard = () => {
           <p style={{ color: 'var(--text-muted)' }}>Manage and track your project tasks</p>
         </div>
         {user?._id === project?.admin?._id && (
-          <button 
-            onClick={() => setIsModalOpen(true)}
-            className="btn-primary" 
-            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
-          >
-            <Plus size={18} /> New Task
-          </button>
+          <div style={{ display: 'flex', gap: '15px' }}>
+            <button 
+              onClick={handleDeleteProject}
+              className="btn-danger" 
+              style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#ef4444', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer' }}
+            >
+              Delete Project
+            </button>
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              className="btn-primary" 
+              style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+            >
+              <Plus size={18} /> New Task
+            </button>
+          </div>
         )}
       </div>
 
@@ -163,9 +199,15 @@ const ProjectBoard = () => {
                     onChange={(e) => setAssignedTo(e.target.value)}
                     style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', borderRadius: '8px', color: 'white', outline: 'none' }}
                   >
-                    {allUsers.map(u => (
-                      <option key={u._id} value={u._id} style={{ color: 'black' }}>
-                        {u.name} {u._id === project?.admin?._id ? '(Admin)' : ''}
+                    <option value="" style={{ color: 'black' }}>Unassigned</option>
+                    {project?.admin && (
+                      <option value={project.admin._id} style={{ color: 'black' }}>
+                        {project.admin.name} (Admin)
+                      </option>
+                    )}
+                    {project?.members?.map(m => (
+                      <option key={m._id} value={m._id} style={{ color: 'black' }}>
+                        {m.name}
                       </option>
                     ))}
                   </select>
@@ -215,13 +257,24 @@ const ProjectBoard = () => {
                       }}>
                         {task.priority}
                       </span>
-                      <select 
-                        value={task.status}
-                        onChange={(e) => updateTaskStatus(task._id, e.target.value)}
-                        style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: '0.75rem', outline: 'none', cursor: 'pointer' }}
-                      >
-                        {statuses.map(s => <option key={s} value={s} style={{ color: 'black' }}>{s}</option>)}
-                      </select>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <select 
+                          value={task.status}
+                          onChange={(e) => updateTaskStatus(task._id, e.target.value)}
+                          style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: '0.75rem', outline: 'none', cursor: 'pointer' }}
+                        >
+                          {statuses.map(s => <option key={s} value={s} style={{ color: 'black' }}>{s}</option>)}
+                        </select>
+                        {user?._id === project?.admin?._id && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleDeleteTask(task._id); }}
+                            style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                            title="Delete Task"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        )}
+                      </div>
                     </div>
                     <h4 style={{ marginBottom: '8px' }}>{task.title}</h4>
                     <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '15px' }}>{task.description}</p>
@@ -231,8 +284,8 @@ const ProjectBoard = () => {
                         <Calendar size={14} />
                         {new Date(task.dueDate).toLocaleDateString()}
                       </div>
-                      <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem' }}>
-                        {task.assignedTo?.name?.charAt(0) || 'U'}
+                      <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: task.assignedTo ? 'var(--primary)' : 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', border: task.assignedTo ? 'none' : '1px dashed var(--text-muted)', color: task.assignedTo ? 'inherit' : 'var(--text-muted)' }}>
+                        {task.assignedTo?.name?.charAt(0) || '?'}
                       </div>
                     </div>
                   </motion.div>
