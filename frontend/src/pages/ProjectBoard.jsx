@@ -36,7 +36,7 @@ const ProjectBoard = () => {
       ]);
       setTasks(taskRes.data);
       setProject(projectRes.data);
-      setAssignedTo(user._id);
+      setAssignedTo(projectRes.data.admin._id);
       setLoading(false);
     } catch (err) {
       console.error(err);
@@ -56,7 +56,7 @@ const ProjectBoard = () => {
         priority,
         dueDate,
         project: id,
-        assignedTo: assignedTo || user._id
+        assignedTo: assignedTo || project?.admin?._id
       }, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
