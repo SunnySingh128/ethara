@@ -5,7 +5,7 @@ import { AuthContext } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, MoreVertical, Calendar, User } from 'lucide-react';
 
-const API = import.meta.env.VITE_API_URL;
+const API = import.meta.env.VITE_API_URL?.replace(/\/$/, '') || 'http://localhost:5000';
 
 const ProjectBoard = () => {
   const { id } = useParams();

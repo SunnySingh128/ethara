@@ -4,7 +4,7 @@ import { AuthContext } from '../context/AuthContext';
 import { motion } from 'framer-motion';
 import { CheckCircle2, Clock, AlertCircle, BarChart3 } from 'lucide-react';
 
-const API = import.meta.env.VITE_API_URL;
+const API = import.meta.env.VITE_API_URL?.replace(/\/$/, '') || 'http://localhost:5000';
 
 const Dashboard = () => {
   const [stats, setStats] = useState(null);

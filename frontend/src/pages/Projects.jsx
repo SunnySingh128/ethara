@@ -5,7 +5,7 @@ import { AuthContext } from '../context/AuthContext';
 import { motion } from 'framer-motion';
 import { Plus, Folder, Users, ChevronRight } from 'lucide-react';
 
-const API = import.meta.env.VITE_API_URL;
+const API = import.meta.env.VITE_API_URL?.replace(/\/$/, '') || 'http://localhost:5000';
 
 const Projects = () => {
   const [projects, setProjects] = useState([]);
