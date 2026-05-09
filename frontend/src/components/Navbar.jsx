@@ -29,7 +29,7 @@ const Navbar = () => {
         textDecoration: 'none',
         letterSpacing: '-1px'
       }}>
-        Ethara
+        TaskNova
       </Link>
       
       <div style={{ display: 'flex', gap: '40px', alignItems: 'center' }}>
