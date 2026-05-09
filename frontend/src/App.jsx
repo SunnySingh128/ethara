@@ -6,6 +6,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Projects from './pages/Projects';
 import ProjectBoard from './pages/ProjectBoard';
+import Signup from './pages/Signup';
 
 const PrivateRoute = ({ children }) => {
   const { user, loading } = useContext(AuthContext);
@@ -21,7 +22,7 @@ function App() {
           <Navbar />
           <Routes>
             <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Login />} />
+            <Route path="/register" element={<Signup />} />
             <Route path="/dashboard" element={
               <PrivateRoute>
                 <Dashboard />

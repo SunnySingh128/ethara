@@ -36,7 +36,7 @@ router.get('/', protect, async (req, res) => {
 // @desc    Get project by ID
 // @route   GET /api/projects/:id
 router.get('/:id', protect, async (req, res) => {
-  const project = await Project.findById(req.id).populate('admin members', 'name email');
+  const project = await Project.findById(req.params.id).populate('admin members', 'name email');
 
   if (project) {
     res.json(project);
